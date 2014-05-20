@@ -25,28 +25,31 @@ function role_based_caching_example_some_page() {
   static $html;
 
   //First lets get the role of the current user
-  //Since he might have multiple roles we shall for a combination of his roles
+  //Since he might have multiple roles we shall cache for a combination of his roles
   //Lets build an identifier for his combination of roles
+  //We will do it by building a unique key for the role combination of the user
   global $user;
   $roles_key = '';
   foreach ($user->roles as $rid => $name) {
     $roles_key .= $rid . "_";
   }
 
-
   //This is the check for cache availability. Read through rest of the code and come back here later to understand better
   //Also read https://www.lullabot.com/blog/article/beginners-guide-caching-data-drupal-6
   if ($cache = cache_get('role_based_caching_' . $roles_key)) {
+    //if the specified cache was available, take that as $html
+    //note that we are building unque cache ids for combinations of roles using $roles_key built earlier
     $html = $cache->data;
   }
   else {
-    //The heavy query
+    //The heavy query ;-) Just saying
     $result = db_query("SELECT * FROM {node}");
     $count = $result->num_rows;
-
+    
+    //This is the markup we generate. Just like getCMDashboardAdditionalHTML()
     $html = "This is the markup. The result is $count and this query was executed at " . format_date(time(), $type = 'custom', $format = 'm/d/Y - H:i:s');
 
-    //Now we could return the $html and close the function but lets try to
+    //Now we would set this in cache before returning
     //implement some role based caching
     //Lets set the query result in cache
     cache_set('role_based_caching_' . $roles_key, $html, 'cache');
