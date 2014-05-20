@@ -21,6 +21,7 @@ function role_based_caching_example_menu() {
  */
 function role_based_caching_example_some_page() {
   //Static just in case, this is shown on page twice
+  //The html similar to what getCMDashboardAdditionalHTML() on Whiteboard is building
   static $html;
 
   //First lets get the role of the current user
@@ -43,7 +44,6 @@ function role_based_caching_example_some_page() {
     $result = db_query("SELECT * FROM {node}");
     $count = $result->num_rows;
 
-    //The html similar to what getCMDashboardAdditionalHTML() on Whiteboard is building
     $html = "This is the markup. The result is $count and this query was executed at " . format_date(time(), $type = 'custom', $format = 'm/d/Y - H:i:s');
 
     //Now we could return the $html and close the function but lets try to
