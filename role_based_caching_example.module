@@ -1,0 +1,70 @@
+<?php
+
+/**
+ * Implementatation of hook_menu().
+ */
+function role_based_caching_example_menu() {
+
+  $items['some-page'] = array(
+    'title' => 'A sample page running a query',
+    'description' => 'En example module that demonstrates caching content from a query on a callback, per role',
+    'page callback' => 'role_based_caching_example_some_page',
+    'access callback' => TRUE,
+    'expanded' => TRUE,
+  );
+
+  return $items;
+}
+
+/**
+ * The call back function for menu item
+ */
+function role_based_caching_example_some_page() {
+  //Static just in case, this is shown on page twice
+  static $html;
+
+  //First lets get the role of the current user
+  //Since he might have multiple roles we shall for a combination of his roles
+  //Lets build an identifier for his combination of roles
+  global $user;
+  $roles_key = '';
+  foreach ($user->roles as $rid => $name) {
+    $roles_key .= $rid . "_";
+  }
+
+
+  //This is the check for cache availability. Read through rest of the code and come back here later to understand better
+  //Also read https://www.lullabot.com/blog/article/beginners-guide-caching-data-drupal-6
+  if ($cache = cache_get('role_based_caching_' . $roles_key)) {
+    $html = $cache->data;
+  }
+  else {
+    //The heavy query
+    $result = db_query("SELECT * FROM {node}");
+    $count = $result->num_rows;
+
+    //The html similar to what getCMDashboardAdditionalHTML() on Whiteboard is building
+    $html = "This is the markup. The result is $count and this query was executed at " . format_date(time(), $type = 'custom', $format = 'm/d/Y - H:i:s');
+
+    //Now we could return the $html and close the function but lets try to
+    //implement some role based caching
+    //Lets set the query result in cache
+    cache_set('role_based_caching_' . $roles_key, $html, 'cache');
+  }
+  
+  //In any case, cached or uncached, just return the html
+  return $html;
+}
+
+/**
+ * Additionally you could also have a hook_cron implementation here to delete the 
+ * cache with all cids as role_based_caching_*
+ */
+
+/**
+ * Implementatation of hook_cron().
+ */
+function role_based_caching_example_cron() {
+  //Make sure to configure Elysia cron such that you can give a custom interval for this cron
+  cache_clear_all("role_based_caching_", 'cache', TRUE);
+}

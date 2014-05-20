@@ -1,0 +1,4 @@
+name = Role Based Caching Example
+description = Example Module for demonstrating role-based caching in D6
+core = 6.x
+package = Tanay
