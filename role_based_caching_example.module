@@ -69,5 +69,8 @@ function role_based_caching_example_some_page() {
  */
 function role_based_caching_example_cron() {
   //Make sure to configure Elysia cron such that you can give a custom interval for this cron
+  //Notice the third parameter = TRUE. This is required to enable wildcard CC
+  //So that all caches with cache ids starting with role_based_caching_ are cleared 
+  //and not just the one with role_based_caching_
   cache_clear_all("role_based_caching_", 'cache', TRUE);
 }
